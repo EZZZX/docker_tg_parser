@@ -1,0 +1,28 @@
+version: "3.8"
+services:
+  # postgresql:
+  #   image: postgres:13.1
+  #   healthcheck:
+  #     test: [ "CMD", "pg_isready", "-q", "-d", "postgres", "-U", "usr" ]
+  #     timeout: 45s
+  #     interval: 10s
+  #     retries: 10
+  #   restart: always
+  #   environment:
+  #     - POSTGRES_USER=usr
+  #     - POSTGRES_PASSWORD=pass
+  #     - POSTGRES_DB=sqlalchemy
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data/
+  #   ports:
+  #     - 5432:5432
+  db:
+    build: ./db/
+    # network_mode: host
+    # ports: 
+    #   - '5432:5432'
+  app:
+    build: ./app/
+    # network_mode: host
+    # depends_on: 
+    #   - db
