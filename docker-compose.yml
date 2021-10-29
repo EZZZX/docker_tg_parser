@@ -18,11 +18,16 @@ services:
   #     - 5432:5432
   db:
     build: ./db/
+    restart: always
+    volumes:
+      - ./data:/data/db
     # network_mode: host
     # ports: 
     #   - '5432:5432'
   app:
     build: ./app/
+    restart: always
+
     # network_mode: host
     # depends_on: 
     #   - db

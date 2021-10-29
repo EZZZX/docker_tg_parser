@@ -5,7 +5,10 @@ from aiogram.utils.markdown import hbold, hunderline, hcode, hlink
 from aiogram.dispatcher.filters import Text
 from parser import get_current_news
 import asyncio
-from datetime import date
+import datetime as dt
+from threading import Thread
+
+
 
 from user import User
 from base import Session, engine, Base
@@ -64,6 +67,7 @@ async def get_fresh_news(message: types.Message):
     if len(current_news) > 0:
         for k, v in current_news.items():
             news = article_to_text(v)
+            update_user_seen(message.chat.id, time.time())
             await message.answer(news)
     else:
         await message.answer("no fresh news")
@@ -81,7 +85,8 @@ async def stop(message: types.Message):
     idmes = f'your id : {message.chat.id}'
     await message.answer(idmes)
     for user in users:    
-        news = f'{user.id} was registered on {user.time_created} : {user.status} - last seen: {user.last_seen}'
+        timestamp = dt.datetime.fromtimestamp(user.last_seen).strftime('%Y-%m-%d %H:%M:%S')
+        news = f'{user.id} was registered on {user.time_created} : {user.status} - last seen: {timestamp}'
         # print('\n')
         await message.answer(news)
 
@@ -97,8 +102,11 @@ async def updating_db():
                     for user in session.query(User).yield_per(10).enable_eagerloads(False): 
                         if user.status == "active":
                             await bot.send_message(user.id, article_to_text(v)) 
+
+        print("DB updated")
         session.commit()
-        await asyncio.sleep(60)
+        # await asyncio.sleep(60)
+        time.sleep(5)
 
 def article_to_text(article):
     if (isinstance(article,Article)):
@@ -107,6 +115,9 @@ def article_to_text(article):
         return f"{hbold(article['article_date'])}\n\n{hlink(article['article_title'],article['article_link'])}"
 
 
+def update_user_seen(user_id, time):
+    session.query(User).filter_by(id = user_id).first().last_seen = time
+
 
 def add_user(user_id):
     if (not users_contain(user_id)):
@@ -114,7 +125,7 @@ def add_user(user_id):
         print("User added")
     else:
         session.query(User).filter_by(id = user_id).first().status = "active"
-        print("User revoked suhbscription")
+        print("User revoked subscription")
     session.commit()
 
 def news_contain(k) -> bool:
@@ -123,8 +134,11 @@ def users_contain(k) -> bool:
     return session.query(session.query(User.id).filter_by(id = k).exists()).scalar()
 
 if __name__ == "__main__":
-    loop = asyncio.get_event_loop()
-    # loop.create_task(news_every_minute())
-    loop.create_task(updating_db())
+    t = Thread(target=updating_db)
+    t.start()
+    # loop = asyncio.get_event_loop()
+    # # loop.create_task(news_every_minute())
+    # loop.create_task(updating_db())
+    # loop.run_forever()
 
     executor.start_polling(dp)
