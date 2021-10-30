@@ -85,8 +85,9 @@ async def stop(message: types.Message):
     idmes = f'your id : {message.chat.id}'
     await message.answer(idmes)
     for user in users:    
-        timestamp = dt.datetime.fromtimestamp(user.last_seen).strftime('%Y-%m-%d %H:%M:%S')
-        news = f'{user.id} was registered on {user.time_created} : {user.status} - last seen: {timestamp}'
+        timestamp_created = dt.datetime.fromtimestamp(user.time_created).strftime('%Y-%m-%d %H:%M:%S')
+        timestamp_seen = dt.datetime.fromtimestamp(user.last_seen).strftime('%Y-%m-%d %H:%M:%S')
+        news = f'{user.id} was registered on {timestamp_created} : {user.status} - last seen: {timestamp_seen}'
         # print('\n')
         await message.answer(news)
 
