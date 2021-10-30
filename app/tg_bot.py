@@ -134,11 +134,12 @@ def users_contain(k) -> bool:
     return session.query(session.query(User.id).filter_by(id = k).exists()).scalar()
 
 if __name__ == "__main__":
-    t = Thread(target=updating_db)
-    t.start()
+    # t = Thread(target=updating_db)
+    # t.start()
     # loop = asyncio.get_event_loop()
     # # loop.create_task(news_every_minute())
     # loop.create_task(updating_db())
     # loop.run_forever()
 
     executor.start_polling(dp)
+    updating_db()
